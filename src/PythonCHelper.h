@@ -6,7 +6,7 @@
 #include <memory>
 #include <mutex>
 #include <thread>
-#include "../library/Python311/include/Python.h"
+#include "Python.h"
 
 #ifndef PYTHONCHELPER_PYTHONCHELPER_H
 #define PYTHONCHELPER_PYTHONCHELPER_H

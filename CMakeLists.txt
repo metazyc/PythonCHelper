@@ -6,7 +6,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 add_library(PythonCHelper SHARED ./src/PythonCHelper.h ./src/PythonCHelper.cpp)
 
-add_subdirectory(${PROJECT_SOURCE_DIR}/library/googletest-1.13.0)
+add_subdirectory(${PROJECT_SOURCE_DIR}/library/googletest)
 add_subdirectory(tests)
 
 #set(PYTHON_LIBRARY "${PROJECT_SOURCE_DIR}/library/Python311/libs/python3.lib")
