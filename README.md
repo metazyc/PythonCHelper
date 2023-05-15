@@ -7,7 +7,7 @@ By transferring python parameters to c++ standard types.
 
 # download google test
 ```
-cd Library
+cd library
 mkdir googletest
 cd googletest
 git clone https://github.com/google/googletest.git
