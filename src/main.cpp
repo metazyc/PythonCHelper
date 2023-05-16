@@ -8,11 +8,8 @@ using namespace mimic;
 int main()
 {
     PythonCHelper helper;
-    if(helper.InitPythonEnv())
-    {
-        if(helper.LoadScript("script_test"))
-        {
-            helper.RunFunction("executeTest");
-        }
-    }
+
+    helper.LoadScript("script_test");
+    int result = helper.executeFunction<int>("returnIntWithoutInput", "(si)", "hello", 42);
+    return result;
 }

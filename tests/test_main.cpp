@@ -6,22 +6,27 @@
 
 using namespace mimic;
 
-TEST(PythonCHelperTestCase, testInitPythonEnv)
+TEST(PythonCHelperTestCase, returnIntWithInput)
 {
     PythonCHelper helper;
-    EXPECT_EQ(true, helper.InitPythonEnv());
+
+    helper.LoadScript("script_test");
+    EXPECT_EQ(2, helper.executeFunction<int>("returnIntWithoutInput", "(si)", "hello", 42));
 }
 
+TEST(PythonCHelperTestCase, returnStringWithInput)
+{
+    PythonCHelper helper;
+    helper.LoadScript("script_test");
+    EXPECT_EQ("hello", helper.executeFunction<std::string>("returnStringWithoutInput", "(si)", "hello", 42));
+}
 
 TEST(PythonCHelperTestCase, testRunFunction)
 {
     PythonCHelper helper;
-    if(helper.InitPythonEnv())
+    if(helper.LoadScript("script_test"))
     {
-        if(helper.LoadScript("script_test"))
-        {
-            EXPECT_EQ(true, helper.RunFunction("executeTest"));
-        }
+        EXPECT_EQ(true, helper.RunFunction("executeTest"));
     }
 }
 

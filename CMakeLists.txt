@@ -12,34 +12,38 @@ add_subdirectory(tests)
 #set(PYTHON_LIBRARY "${PROJECT_SOURCE_DIR}/library/Python311/libs/python3.lib")
 #set(PYTHON_INCLUDE_DIR "${PROJECT_SOURCE_DIR}/library/Python311/include")
 
-find_package(PythonLibs REQUIRED)
-target_include_directories(PythonCHelper PRIVATE ${PYTHON_INCLUDE_DIR})
-target_link_libraries(PythonCHelper ${PYTHON_LIBRARY})
+find_package(Python COMPONENTS Interpreter Development REQUIRED)
 
-target_include_directories(MainTest PRIVATE ${PROJECT_SOURCE_DIR}/tests ${PYTHON_INCLUDE_DIR})
-target_link_libraries(MainTest ${PYTHON_LIBRARY})
+message(STATUS "Python include dirs: ${Python_INCLUDE_DIRS}")
+
+target_include_directories(PythonCHelper PRIVATE ${Python_INCLUDE_DIRS})
+target_link_libraries(PythonCHelper ${Python_LIBRARIES})
+
+target_include_directories(MainTest PRIVATE ${PROJECT_SOURCE_DIR}/tests ${Python_INCLUDE_DIRS})
+target_link_libraries(MainTest ${Python_LIBRARIES})
 
 include_directories(${PROJECT_SOURCE_DIR}/src)
 
 add_executable(Main ${PROJECT_SOURCE_DIR}/src/main.cpp)
-
-target_link_libraries(Main PRIVATE PythonCHelper)
+target_include_directories(Main PRIVATE ${Python_INCLUDE_DIRS})
+target_link_libraries(Main PythonCHelper ${Python_LIBRARIES})
 
 add_custom_command(TARGET PythonCHelper POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_if_different
         $<TARGET_FILE:PythonCHelper>
         ${CMAKE_CURRENT_BINARY_DIR}/tests)
 
-add_custom_command(TARGET PythonCHelper PRE_BUILD
+add_custom_command(TARGET PythonCHelper POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_if_different
         ${CMAKE_CURRENT_SOURCE_DIR}/tests/script_test.py
         ${CMAKE_CURRENT_BINARY_DIR}/script_test.py)
 
-add_custom_command(TARGET PythonCHelper PRE_BUILD
+add_custom_command(TARGET PythonCHelper POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_if_different
         ${CMAKE_CURRENT_SOURCE_DIR}/tests/script_test.py
         ${CMAKE_CURRENT_BINARY_DIR}/tests/script_test.py)
-file(GLOB DLL_FILES "${PYTHON_LIBRARY}/*.dll")
+
+file(GLOB DLL_FILES "${Python_LIBRARIES}/*.dll")
 
 foreach(DLL_FILE ${DLL_FILES})
     add_custom_command(TARGET PythonCHelper POST_BUILD

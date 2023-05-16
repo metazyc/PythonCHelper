@@ -4,29 +4,23 @@
 
 #include "PythonCHelper.h"
 #define PY_SSIZE_T_CLEAN
-#include "Python.h"
-
 namespace mimic
 {
+
     PythonCHelper::PythonCHelper()
     {
-
-    }
-
-    PythonCHelper::~PythonCHelper()
-    {
-        Py_Finalize();
-    }
-
-    bool PythonCHelper::InitPythonEnv() {
         Py_Initialize();
 
         if (!Py_IsInitialized())
         {
             PyErr_Print();
-            return false;
+            throw std::runtime_error("Failed to initialize Python environment");
         }
-        return true;
+    }
+
+    PythonCHelper::~PythonCHelper()
+    {
+        Py_Finalize();
     }
 
     bool PythonCHelper::LoadScript(const std::string &scriptName) {
@@ -80,15 +74,44 @@ namespace mimic
         }
     }
 
-    PythonObject::PythonObject(PyObject* object_ptr):
-    object_ptr_(object_ptr)
-    {
-
+    template <>
+    int PythonCHelper::pythonToCpp<int>(PyObject* obj) {
+        if(PyLong_Check(obj)) {
+            return PyLong_AsLong(obj);
+        }
+        throw std::runtime_error("Object is not an integer");
     }
 
-    PythonObject::~PythonObject()
-    {
-
+    template <>
+    std::string PythonCHelper::pythonToCpp<std::string>(PyObject* obj) {
+        if(PyUnicode_Check(obj)) {
+            PyObject* temp_bytes = PyUnicode_AsEncodedString(obj, "UTF-8", "strict"); // New reference
+            if(temp_bytes != NULL) {
+                std::string str = PyBytes_AS_STRING(temp_bytes); // Borrowed pointer
+                Py_DECREF(temp_bytes);
+                return str;
+            }
+        }
+        throw std::runtime_error("Object is not a string");
     }
 
+    template <>
+    std::map<std::string, PyObject*> PythonCHelper::pythonToCpp<std::map<std::string, PyObject*>>(PyObject* obj) {
+        if(!PyDict_Check(obj)) {
+            throw std::runtime_error("Object is not a dictionary");
+        }
+
+        std::map<std::string, PyObject*> result;
+        PyObject *key, *value;
+        Py_ssize_t pos = 0;
+
+        while (PyDict_Next(obj, &pos, &key, &value)) {
+            // convert Python string key to C++ string
+            std::string key_str = pythonToCpp<std::string>(key);
+            // add to result map
+            result[key_str] = value;
+        }
+
+        return result;
+    }
 }
